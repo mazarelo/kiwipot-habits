@@ -1,0 +1,46 @@
+name: Release
+
+# A tag (1.2.0) builds the plugin and attaches kiwipot-plugin.json and plugin.js to its GitHub release: the links the
+# Kiwipot registry pins. "main" is the script's absolute link: GitHub's download links redirect to signed storage URLs,
+# so a path next to the manifest would resolve against those.
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: The release's manifest
+        env:
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const manifest = JSON.parse(fs.readFileSync("kiwipot-plugin.json", "utf8"));
+            if (manifest.version !== process.env.TAG) {
+              console.error(`The tag is ${process.env.TAG}, the manifest says ${manifest.version}`);
+              process.exit(1);
+            }
+            manifest.main = `https://github.com/${process.env.REPO}/releases/download/${process.env.TAG}/plugin.js`;
+            fs.mkdirSync("release", { recursive: true });
+            fs.writeFileSync("release/kiwipot-plugin.json", JSON.stringify(manifest, null, 2) + "\n");
+            fs.copyFileSync("dist/plugin.js", "release/plugin.js");
+          '
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" release/kiwipot-plugin.json release/plugin.js --title "$TAG" --notes "Install it in Kiwipot from Settings → Plugins → Reviewed plugins."

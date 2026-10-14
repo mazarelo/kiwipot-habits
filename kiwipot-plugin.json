@@ -1,0 +1,22 @@
+{
+  "id": "habits",
+  "name": "Habit tracker",
+  "version": "1.0.0",
+  "author": "Kiwipot",
+  "description": "Habits to tick off each day, with your streaks, in a note.",
+  "protocol": 1,
+  "main": "dist/plugin.js",
+  "block": {
+    "title": "Habits",
+    "description": "Tick off each day, keep your streaks",
+    "keywords": ["habit", "habits", "streak", "daily", "routine", "tracker", "goals"],
+    "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6\" cy=\"6\" r=\"3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><path d=\"m15 18 2 2 4-4\"/></svg>",
+    "translations": {
+      "de": { "title": "Gewohnheiten", "description": "Jeden Tag abhaken, Serien halten" },
+      "es": { "title": "Hábitos", "description": "Marca cada día y mantén tus rachas" },
+      "fr": { "title": "Habitudes", "description": "Cochez chaque jour, gardez vos séries" },
+      "it": { "title": "Abitudini", "description": "Spunta ogni giorno, mantieni le serie" },
+      "pt": { "title": "Hábitos", "description": "Marque cada dia e mantenha as sequências" }
+    }
+  }
+}
