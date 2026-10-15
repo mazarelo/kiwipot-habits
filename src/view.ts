@@ -38,7 +38,23 @@ export const STYLES = `
 html, body { margin: 0; background: transparent; }
 .habits { padding: 2px 0; }
 .habits--page { padding: 16px; max-width: 980px; margin: 0 auto; }
-.habits__grid { display: grid; gap: 4px 6px; align-items: center; overflow-x: auto; padding-bottom: 2px; }
+/* In the note: a row per habit (its name, its last 7 days, its streak), its name and streak placed by column and the
+   days filling the gap between them (dense). A block narrower than that row (a phone) puts the name and streak on a
+   line of their own, and the days under them across the whole width. */
+.habits__grid {
+  display: grid; grid-template-columns: minmax(120px, 1fr) repeat(7, 36px) auto; grid-auto-flow: row dense;
+  gap: 4px 6px; align-items: center; overflow-x: auto; padding-bottom: 2px;
+}
+.habits__head { display: contents; }
+.habits__head > .habits__name, .habits__head > .habits__name-text { grid-column: 1; }
+.habits__head > .habits__streak { grid-column: -2; }
+@media (max-width: 540px) {
+  .habits__grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .habits__corner { display: none; }
+  .habits__head { display: flex; grid-column: 1 / -1; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; margin-top: 6px; }
+  .habits__head > .habits__name, .habits__head > .habits__name-text { min-width: 0; }
+  .habits__cell { width: min(36px, 100%); height: auto; aspect-ratio: 1; }
+}
 .habits__day-name { font-size: 11px; font-weight: 600; text-align: center; color: var(--kiwipot-ink-3); text-transform: uppercase; }
 .habits__day-name--today { color: var(--kiwipot-accent-text); }
 .habits__name { justify-content: flex-start; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: var(--kiwipot-ink); }
@@ -58,7 +74,7 @@ html, body { margin: 0; background: transparent; }
 .habits__date { font-size: 11px; color: var(--kiwipot-ink-3); }
 .habits__form { display: flex; gap: 6px; align-items: center; }
 .habits__form .kp-input { flex: 1; min-width: 0; }
-@media (pointer: coarse) { .habits__cell { width: 36px; height: 36px; } }
+@media (pointer: coarse) and (min-width: 541px) { .habits__cell { width: 36px; height: 36px; } }
 `;
 
 const element = <K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text?: string) => {
@@ -259,20 +275,21 @@ export const createView = (options: ViewOptions): View => {
 
     const streakOf = (habit: Habit) => {
       const run = streak(habit, today);
-      return run > 0 ? element('span', 'kp-badge kp-badge--accent habits__streak', fill(s.streak, { n: run })) : element('span');
+      return run > 0
+        ? element('span', 'kp-badge kp-badge--accent habits__streak', fill(s.streak, { n: run }))
+        : element('span', 'habits__streak');
     };
 
     if (habits.habits.length > 0 && !page) {
       // In the note: a row per habit, the last 7 days
       const grid = element('div', 'habits__grid');
-      grid.style.gridTemplateColumns = `minmax(120px, 1fr) repeat(${days.length}, 36px) auto`;
-      grid.append(element('span'));
+      grid.append(element('span', 'habits__corner'));
       for (const day of days) {
         const name = element('span', `habits__day-name${day === todayKey ? ' habits__day-name--today' : ''}`, dayName(day, 'narrow'));
         name.title = dayName(day, 'long');
         grid.append(name);
       }
-      grid.append(element('span'));
+      grid.append(element('span', 'habits__corner'));
       for (const habit of habits.habits) {
         const other = replaced(habit);
         if (other) {
@@ -280,7 +297,9 @@ export const createView = (options: ViewOptions): View => {
           grid.append(other);
           continue;
         }
-        grid.append(nameOf(habit), ...days.map((day) => cellOf(habit, day)), streakOf(habit));
+        const head = element('div', 'habits__head');
+        head.append(nameOf(habit), streakOf(habit));
+        grid.append(head, ...days.map((day) => cellOf(habit, day)));
       }
       wrapper.append(grid);
     }

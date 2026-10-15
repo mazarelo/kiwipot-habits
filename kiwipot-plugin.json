@@ -1,7 +1,7 @@
 {
   "id": "habits",
   "name": "Habit tracker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Kiwipot",
   "description": "Habits to tick off each day, with your streaks, in a note.",
   "protocol": 1,
