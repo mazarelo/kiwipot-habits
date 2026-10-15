@@ -1,6 +1,6 @@
 {
   "name": "kiwipot-habits",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "A habit tracker for Kiwipot: habits to tick off each day, with your streaks, in a note.",
   "type": "module",
